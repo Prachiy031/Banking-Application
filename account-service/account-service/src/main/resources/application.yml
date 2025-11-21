@@ -1,0 +1,49 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: account-service
+    bad_request: 400
+    conflict: 409
+    ok: 200
+    not_found: 404
+
+#don't need to create tables as hibernate creates tables based on entity
+  datasource:
+    url: jdbc:mysql://localhost:3306/account_service       #database name=>account-service 
+    username: root
+    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update           #auto create/update table    ..table doesen't exists=>create it
+    show-sql: true               #show sql in log
+    properties:
+      hibernate:
+        format_sql: true         #show sql in well readable format
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # This line is the critical piece that tells all services where to get the public key
+          jwk-set-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/certs
+          
+  cloud:                        #Config server => centralized server for storing all config files usually on github
+    config:                      #we are storing all config files in project folder itself so when application starts 
+        enabled: false            #it retrieves config files from project folder itself not from config server
+        
+  logging:
+    level:
+      org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE    #method <=> URl mapping 
+      org.springframework.web: TRACE            #logs entire request lifecycle{from when request hits dispatcher servlet to when response is rendered}
+   
+  
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port} # Creates ID like account-service:8081
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

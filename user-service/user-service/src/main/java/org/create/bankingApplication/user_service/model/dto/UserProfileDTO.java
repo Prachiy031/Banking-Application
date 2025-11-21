@@ -1,0 +1,31 @@
+package org.create.bankingApplication.user_service.model.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data                 
+@NoArgsConstructor    
+@AllArgsConstructor   
+@Builder   	
+/*
+	 Response DTO
+*/
+public class UserProfileDTO {
+	
+	private String firstName;
+	
+	private String lastName;
+	
+	private String gender;
+	
+	private String address;
+	
+	private String occupation;
+	
+	private String maritalStatus;
+	
+	private String nationality;
+}

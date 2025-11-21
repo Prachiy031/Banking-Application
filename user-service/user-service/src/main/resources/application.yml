@@ -1,0 +1,51 @@
+server:
+  port: 8082
+  
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port} # Creates ID like user-service:8082
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: user-service       #case senstive{should match name in load balanced path in api gateway's yaml file}   #service name registered in eureka 
+    success: 200        #entity created sucessfully
+    not_found: 404		#user not found
+    conflict: 409
+    error: 500			#server side error
+    bad_request: 400
+  
+  logging:
+    level:
+      org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE    #method <=> URl mapping 
+      org.springframework.web: TRACE            #logs entire request lifecycle{from when request hits dispatcher servlet to when response is rendered}
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_service         #db name
+    username: root
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: update                       #auto update/create tables
+    show-sql: true                           #show sql in log
+    properties:
+      hibernate:
+        format_sql: true                     #format sql in well format to well readable format
+  cloud:                                     #Config server => centralized server for storing all config files usually on github
+    config:                                  #we are storing all config files in project folder itself so when application starts 
+      enabled: false                         #it retrieves config files from project folder itself not from config server
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/certs   #keycloak realm public key endpoint
+          
+app:
+  config:
+    keycloak:
+      server-url: http://localhost:8571
+      realm: banking-service                  #realm name
+      client-id: banking-service-client       #client id
+      client-secret: P0qedUGn8s9DckiUr5hDun1aAqtOcTfC      #client secret

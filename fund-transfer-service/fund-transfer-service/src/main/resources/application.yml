@@ -1,0 +1,46 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: fund-transfer-service
+    bad_request: 400
+    ok: 200
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/fund_transfer_service
+    username: root
+    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update              #auto update/create tables in fund_transfer_service db
+    show-sql: true                  #show sql in log
+    properties:
+      hibernate:
+        format_sql: true            #format sql in well readble format
+        
+  cloud:                           #Config server => centralized server for storing all config files usually on github
+    config:                         #we are storing all config files in project folder itself so when application starts 
+      enabled: false                  #it retrieves config files from project folder itself not from config server
+      
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # This line is the critical piece that tells all services where to get the public key
+          jwk-set-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/certs
+      
+  logging:
+    level:
+      org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE    #method <=> URl mapping 
+      org.springframework.web: TRACE            #logs entire request lifecycle{from when request hits dispatcher servlet to when response is rendered}
+         
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port} # Creates ID like fund-transfer-service:8085
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+      

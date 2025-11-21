@@ -1,0 +1,114 @@
+server:
+  port: 8080       #port for api gateway
+
+app:
+  config:
+    keycloak:
+      url: http://localhost:8571/            #keycloak server url
+      realm: banking-service                 #realm name 
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka          #Eureka server url {service discovery server}
+  instance:
+    prefer-ip-address: true         #gateway registers its IP address to eureka instead of hostname
+    instance-id: ${spring.application.name}:${server.port}
+    
+logging:
+  level:
+    org.springframework.security: DEBUG               #logging security
+    org.springframework.cloud.gateway: TRACE          #logging for gateway routing
+    org.springframework.cloud.loadbalancer: TRACE     #logging for loadbalanacer
+    reactor.netty: INFO                                #logs regarding which netty thread handling which operation
+    org.springframework.web.reactive.handler: TRACE   #Explicitly trace handler mapping
+    
+spring:
+  application:
+    name: apigateway-service                  #api gateway microservice name
+
+
+#id =>   identifier for route or service name 
+#uri => load balanced calls to eureka
+#predicates => all request of path as predicate goes to respective service {this path is like base url for those services}
+               #** matches 0 or more path segments
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true            #forces consistency by converting its request to lowercase => loadbalancer searches for lowercase service name
+                                                   #service registry is case tolerant 
+                                                   #When queried by the Gateway for a service named in lowercase{forced by api gateway},
+                                                   #it can successfully map this to the registered service named in uppercase
+      routes:        
+        - id: user-service          #does not have case sensitivity reltion with eureka     #identifier for this specific block of configuration {used during logging(to refer route matched for respective service), used for configuration(for making yaml readable), for internal processing(gateway uses it to refer respcetive route) }              
+          uri: lb://user-service  #should match case as mentioned in application name of respective service' yaml file      #Gateway's loadbalancer look up for service with this id registered in eureka 
+          predicates:
+            - Path=/api/users/**  
+          filters:
+            - TokenRelay             #pass the token received by api gateway to downstream service in authentication header                                          
+            - RewritePath=/(?<segment>.*), /$\{segment}   #pass the exact path after service port to downstream service controller by adding /before segment
+        - id: fund-transfer-service               #fund-transfer-service
+          uri: lb://fund-transfer-service
+          predicates:
+            - Path=/fund-transfers/**
+          filters:
+            - TokenRelay                                       
+            - RewritePath=/(?<segment>.*), /$\{segment}   
+        - id: account-service                   #account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - TokenRelay             
+            - RewritePath=/(?<segment>.*), /$\{segment}   
+        - id: sequence-generator-service        #sequence-generator-service
+          uri: lb://sequence-generator-service
+          predicates:
+            - Path=/sequence/**
+          filters:
+            - TokenRelay             
+            - RewritePath=/(?<segment>.*), /$\{segment}   
+        - id: transaction-service            #transaction-service
+          uri: lb://transaction-service
+          predicates:
+            - Path=/transactions/**
+          filters:
+            - TokenRelay             
+            - RewritePath=/(?<segment>.*), /$\{segment}   
+        - id: fund-transfer-service         #fund-transfer-service
+          uri: lb://fund-transfer-service
+          predicates:
+            - Path=/fund-transfers/**
+          filters:
+            - TokenRelay             
+            - RewritePath=/(?<segment>.*), /$\{segment}   
+            
+    config:
+      enabled: false
+#spring security oauth + keycloak section
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:                           #keycloak configurations
+            token-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/token
+            authorization-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/auth
+            user-name-attribute: preferred_username
+            user-info-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/userinfo
+            jwk-set-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/certs
+            user-info-authentication-method: header
+        registration:
+          banking-service-client:            #client registration
+            provider: keycloak
+            client-id: banking-service-client
+            client-secret: P0qedUGn8s9DckiUr5hDun1aAqtOcTfC  
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid
+      resourceserver:                     #jwt validation {validates jwt token}
+        jwt:
+          jwk-set-uri: http://localhost:8571/realms/banking-service/protocol/openid-connect/certs
+
+
