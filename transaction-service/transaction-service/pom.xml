@@ -14,7 +14,7 @@
     </parent>
 
     <groupId>org.create.bankingApplication</groupId>
-    <artifactId>account-service</artifactId>
+    <artifactId>transaction-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>transaction-service</name>
     <description>Banking Application - Transaction Service</description>
@@ -61,7 +61,7 @@
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
-		<!-- ADDED: Needed for JWT processing (reading the public key from jwks-uri) -->
+		<!-- Needed for JWT processing (reading the public key from jwks-uri) -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>

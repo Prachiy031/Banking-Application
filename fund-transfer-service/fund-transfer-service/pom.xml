@@ -13,7 +13,7 @@
     </parent>
 
     <groupId>org.create.bankingApplication</groupId>
-    <artifactId>funtransfer-service</artifactId>
+    <artifactId>fundtransfer-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>fund-transfer-service</name>
     <description>Banking Application - Fund Transfer Service</description>
