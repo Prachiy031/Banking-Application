@@ -15,7 +15,7 @@ this project for creating databases.
 
 I have used postman for testing  endpoints defined in controller.
 
-In future I'll am focusing on: Docker, Kubernetes to implement for this project.
+In future I am focusing on: Docker, Kubernetes to implement for this project.
 
 Skills: Java, Spring Boot, Maven, Spring cloud, Postman, Keycloak UI, MySQL, SQL
 
